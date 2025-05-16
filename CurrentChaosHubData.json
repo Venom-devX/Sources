@@ -1,0 +1,30 @@
+{
+  "bloxfruits": {
+    "status": "🟢 Online",
+    "features": [
+      "Auto Farm Inteligente (NPCs, Quests e Bosses)",
+      "Teleportes rápidos para ilhas e NPCs",
+      "Fruit Sniper (compra automática de frutas raras)",
+      "ESP (localização de jogadores, frutas e inimigos)",
+      "Auto Boss (derrote bosses automaticamente)",
+      "Auto Haki e Auto Ken",
+      "Distribuição automática de pontos (Auto Stats)",
+      "Proteção contra deteção básica (Anti-AFK, Safe Mode)",
+      "Interface amigável e atualizações frequentes"
+    ]
+  },
+  "brookhaven": {
+    "status": "🟢 Online",
+    "features": [
+      "Desbloqueio de todos os itens",
+      "Motor turbo para veículos",
+      "Voar com qualquer carro",
+      "Ver pessoas invisíveis",
+      "Invisibilidade com toggle",
+      "Teleporte para locais e jogadores",
+      "Anti-Ban (proteção básica)",
+      "Aumento de velocidade e pulos",
+      "Interface leve e fácil de usar"
+    ]
+  }
+}
