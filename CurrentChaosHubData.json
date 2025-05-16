@@ -26,5 +26,34 @@
       "Aumento de velocidade e pulos",
       "Interface leve e fácil de usar"
     ]
+  },
+  "murdermystery": {
+    "status": "🟢 Online",
+    "features": [
+      "Veja o murderer",
+      "Auto collect coins",
+      "ESP de players",
+      "Teleportes rápidos",
+      "Outras ferramentas úteis para dominar as partidas"
+    ]
+  },
+  "bluelock": {
+    "status": "🟢 Online",
+    "features": [
+      "Auto win",
+      "ESP de bola",
+      "Teleportes rápidos",
+      "Auto treino",
+      "Melhorias de stats"
+    ]
+  },
+  "gymleague": {
+    "status": "🟢 Online",
+    "features": [
+      "Auto treino",
+      "Teleportes rápidos",
+      "Coleta automática de itens",
+      "Facilita o crescimento rápido no Gym League"
+    ]
   }
 }
