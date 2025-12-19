@@ -165,7 +165,7 @@ local ExampleBlock; do
     ExampleBlock = Block
 end
 
-local images = loadstring(game:HttpGet("https://raw.githubusercontent.com/max2007killer/auto-build-v2-source-/main/blocks.txt"))()
+local images = loadstring(game:HttpGet("https://raw.githubusercontent.com/Venom-devX/Sources/refs/heads/main/Modules/BABFT/blocks.lua"))()
 
 local function Resize(part, new, delay)
 	local tweenInfo = TweenInfo.new(delay or 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -237,4 +237,5 @@ end
 TextButton.MouseButton1Click:Connect(function() Functions:Clear() end)
 
 return Functions
+
 
