@@ -237,3 +237,4 @@ end
 TextButton.MouseButton1Click:Connect(function() Functions:Clear() end)
 
 return Functions
+
