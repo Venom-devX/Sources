@@ -1,0 +1,47 @@
+name: Discord Changelog Webhook
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  discord_webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Send Discord Webhook
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+          AUTHOR_NAME=$(git log -1 --pretty=format:%an)
+          COMMIT_URL="https://github.com/${GITHUB_REPOSITORY}/commit/${COMMIT_HASH}"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          JSON=$(jq -n --arg title "📝 Update \`$COMMIT_HASH\`" \
+                        --arg url "$COMMIT_URL" \
+                        --arg description "🔹 **Descrição:** $COMMIT_MESSAGE\n🔹 **Autor:** $AUTHOR_NAME" \
+                        --arg timestamp "$TIMESTAMP" \
+                        '{
+                          username: "Chaos Changelog",
+                          avatar_url: "https://cdn-icons-png.flaticon.com/512/733/733553.png",
+                          embeds: [
+                            {
+                              title: $title,
+                              url: $url,
+                              description: $description,
+                              color: 3447003,
+                              footer: {
+                                text: "ChaosHub • GitHub Changelog",
+                                icon_url: "https://cdn-icons-png.flaticon.com/512/733/733553.png"
+                              },
+                              timestamp: $timestamp
+                            }
+                          ]
+                        }')
+
+          curl -H "Content-Type: application/json" -d "$JSON" $DISCORD_WEBHOOK_URL
