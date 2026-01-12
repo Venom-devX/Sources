@@ -16,32 +16,58 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
+          # Dados do commit
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          COMMIT_MESSAGE=$(git log -1 --pretty=format:%s)
+          FULL_MESSAGE=$(git log -1 --pretty=%B | tr -d '\r')
+          TITLE=$(echo "$FULL_MESSAGE" | head -n1)               # primeira linha como título
+          DESCRIPTION=$(echo "$FULL_MESSAGE" | tail -n +2)       # resto como descrição
+          DESCRIPTION=${DESCRIPTION:-"Sem descrição"}            # se não houver descrição
           AUTHOR_NAME=$(git log -1 --pretty=format:%an)
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
           COMMIT_URL="https://github.com/${GITHUB_REPOSITORY}/commit/${COMMIT_HASH}"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          JSON=$(jq -n --arg title "📝 Update \`$COMMIT_HASH\`" \
-                        --arg url "$COMMIT_URL" \
-                        --arg description "🔹 **Descrição:** $COMMIT_MESSAGE\n🔹 **Autor:** $AUTHOR_NAME" \
-                        --arg timestamp "$TIMESTAMP" \
-                        '{
-                          username: "Chaos Changelog",
-                          avatar_url: "https://cdn-icons-png.flaticon.com/512/733/733553.png",
-                          embeds: [
-                            {
-                              title: $title,
-                              url: $url,
-                              description: $description,
-                              color: 3447003,
-                              footer: {
-                                text: "ChaosHub • GitHub Changelog",
-                                icon_url: "https://cdn-icons-png.flaticon.com/512/733/733553.png"
-                              },
-                              timestamp: $timestamp
-                            }
-                          ]
-                        }')
+          # JSON do embed
+          JSON=$(jq -n \
+            --arg title "📝 $TITLE (\`$COMMIT_HASH\`)" \
+            --arg url "$COMMIT_URL" \
+            --arg description "$DESCRIPTION" \
+            --arg author "$AUTHOR_NAME" \
+            --arg branch "$BRANCH_NAME" \
+            --arg timestamp "$TIMESTAMP" \
+            '{
+              username: "Chaos Changelog",
+              avatar_url: "https://cdn-icons-png.flaticon.com/512/733/733553.png",
+              embeds: [
+                {
+                  title: $title,
+                  url: $url,
+                  color: 3447003,
+                  fields: [
+                    {
+                      name: "📄 Descrição",
+                      value: $description,
+                      inline: false
+                    },
+                    {
+                      name: "👤 Autor",
+                      value: $author,
+                      inline: true
+                    },
+                    {
+                      name: "🌿 Branch",
+                      value: $branch,
+                      inline: true
+                    }
+                  ],
+                  footer: {
+                    text: "ChaosHub • GitHub Changelog",
+                    icon_url: "https://cdn-icons-png.flaticon.com/512/733/733553.png"
+                  },
+                  timestamp: $timestamp
+                }
+              ]
+            }')
 
+          # Envia pro Discord
           curl -H "Content-Type: application/json" -d "$JSON" $DISCORD_WEBHOOK_URL
