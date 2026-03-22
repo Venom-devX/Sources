@@ -2441,8 +2441,9 @@ function RayfieldLibrary:CreateWindow(Settings)
 
 			local SectionValue = {}
 
+            local SectionSpace
 			if SDone then
-				local SectionSpace = Elements.Template.SectionSpacing:Clone()
+				SectionSpace = Elements.Template.SectionSpacing:Clone()
 				SectionSpace.Visible = true
 				SectionSpace.Parent = TabPage
 			end
@@ -2458,6 +2459,14 @@ function RayfieldLibrary:CreateWindow(Settings)
 			function SectionValue:Set(NewSection)
 				Section.Title.Text = NewSection
 			end
+            function SectionValue:Destroy()
+                pcall(function()
+                    if SectionSpace then
+                        SectionSpace:Destroy();
+                    end
+                    return Section:Destroy();
+                end)
+            end
 
 			SDone = true
 
