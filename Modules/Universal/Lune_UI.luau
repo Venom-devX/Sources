@@ -1576,45 +1576,50 @@ local PresetGradients = {
 }
 
 local function GetIcon(icon, source)
+	if type(icon) == "string" and (string.find(icon, "rbxassetid://") or string.find(icon, "http://") or string.find(icon, "https://")) then
+		return icon
+	end
 	if source == "Custom" then
-		return "rbxassetid://" .. icon
+		return "rbxassetid://" .. tostring(icon or "")
 	elseif source == "Lucide" then
-		-- full credit to latte softworks :)
-		local iconData = not isStudio and game:HttpGet("https://raw.githubusercontent.com/latte-soft/lucide-roblox/refs/heads/master/lib/Icons.luau")
-		local icons = isStudio and IconModule.Lucide or loadstring(iconData)()
-		if not isStudio then
-			icon = string.match(string.lower(icon), "^%s*(.*)%s*$") :: string
-			local sizedicons = icons['48px']
-
-			local r = sizedicons[icon]
-			if not r then
-				error("Lucide Icons: Failed to find icon by the name of \"" .. icon .. "\.", 2)
+		local success, result = pcall(function()
+			local iconData = not isStudio and game:HttpGet("https://raw.githubusercontent.com/latte-soft/lucide-roblox/refs/heads/master/lib/Icons.luau")
+			local icons = isStudio and IconModule.Lucide or loadstring(iconData)()
+			if not isStudio then
+				local cleanIcon = string.match(string.lower(tostring(icon or "")), "^%s*(.*)%s*$")
+				local sizedicons = icons['48px']
+				local r = sizedicons and sizedicons[cleanIcon]
+				if not r then
+					return nil
+				end
+				local rirs = r[2]
+				local riro = r[3]
+				if type(r[1]) ~= "number" or type(rirs) ~= "table" or type(riro) ~= "table" then
+					return nil
+				end
+				local irs = Vector2.new(rirs[1], rirs[2])
+				local iro = Vector2.new(riro[1], riro[2])
+				return {
+					id = r[1],
+					imageRectSize = irs,
+					imageRectOffset = iro,
+				}
+			else
+				return "rbxassetid://10723434557"
 			end
-
-			local rirs = r[2]
-			local riro = r[3]
-
-			if type(r[1]) ~= "number" or type(rirs) ~= "table" or type(riro) ~= "table" then
-				error("Lucide Icons: Internal error: Invalid auto-generated asset entry")
-			end
-
-			local irs = Vector2.new(rirs[1], rirs[2])
-			local iro = Vector2.new(riro[1], riro[2])
-
-			local asset = {
-				id = r[1],
-				imageRectSize = irs,
-				imageRectOffset = iro,
-			}
-
-			return asset
-		else
-			return "rbxassetid://10723434557"
+		end)
+		if success and result then
+			return result
 		end
+		if icon ~= nil and IconModule["Material"] and IconModule["Material"][icon] then
+			return IconModule["Material"][icon]
+		end
+		return "rbxassetid://10723434557"
 	else	
-		if icon ~= nil and IconModule[source] then
-			local sourceicon = IconModule[source]
-			return sourceicon[icon]
+		if icon ~= nil and IconModule[source] and IconModule[source][icon] then
+			return IconModule[source][icon]
+		elseif icon ~= nil and IconModule["Material"] and IconModule["Material"][icon] then
+			return IconModule["Material"][icon]
 		else
 			return nil
 		end
@@ -2694,6 +2699,18 @@ function Luna:CreateWindow(WindowSettings)
 
 		local Tab = {}
 
+		if type(TabSettings) == "table" then
+			if TabSettings[1] and not TabSettings.Name and not TabSettings.Title then
+				TabSettings.Name = TabSettings[1]
+			end
+			if TabSettings[2] and not TabSettings.Icon then
+				TabSettings.Icon = TabSettings[2]
+			end
+			if TabSettings.Title and not TabSettings.Name then
+				TabSettings.Name = TabSettings.Title
+			end
+		end
+
 		TabSettings = Kwargify({
 			Name = "Tab",
 			ShowTitle = true,
@@ -2706,7 +2723,14 @@ function Luna:CreateWindow(WindowSettings)
 		TabButton.Name = TabSettings.Name
 		TabButton.TextLabel.Text = TabSettings.Name
 		TabButton.Parent = Navigation.Tabs
-		TabButton.ImageLabel.Image = GetIcon(TabSettings.Icon, TabSettings.ImageSource)
+		local iconResult = GetIcon(TabSettings.Icon, TabSettings.ImageSource)
+		if type(iconResult) == "table" then
+			TabButton.ImageLabel.Image = "rbxassetid://" .. tostring(iconResult.id)
+			if iconResult.imageRectSize then TabButton.ImageLabel.ImageRectSize = iconResult.imageRectSize end
+			if iconResult.imageRectOffset then TabButton.ImageLabel.ImageRectOffset = iconResult.imageRectOffset end
+		elseif type(iconResult) == "string" then
+			TabButton.ImageLabel.Image = iconResult
+		end
 
 		TabButton.Visible = true
 
@@ -4048,6 +4072,9 @@ function Luna:CreateWindow(WindowSettings)
 				Dropdown.Selected.Text = ""
 
 				function DropdownV:Set(NewDropdownSettings)
+					if type(NewDropdownSettings) == "table" and not NewDropdownSettings.Options and not NewDropdownSettings.Name then
+						NewDropdownSettings = { Options = NewDropdownSettings }
+					end
 					local previousOption = DropdownV.CurrentOption or (DropdownSettings and DropdownSettings.CurrentOption)
 					local explicitCurrent = NewDropdownSettings and NewDropdownSettings.CurrentOption
 
@@ -5856,6 +5883,9 @@ function Luna:CreateWindow(WindowSettings)
 			Dropdown.Selected.Text = ""
 
 			function DropdownV:Set(NewDropdownSettings)
+				if type(NewDropdownSettings) == "table" and not NewDropdownSettings.Options and not NewDropdownSettings.Name then
+					NewDropdownSettings = { Options = NewDropdownSettings }
+				end
 				local previousOption = DropdownV.CurrentOption or (DropdownSettings and DropdownSettings.CurrentOption)
 				local explicitCurrent = NewDropdownSettings and NewDropdownSettings.CurrentOption
 
